@@ -126,6 +126,33 @@
         });
     });
   </script>
+<script>
+  const noIssuesCheckbox = document.getElementById('noIssues');
+  const diseaseCheckboxes = document.querySelectorAll('input[name="disease"]');
+
+  noIssuesCheckbox.addEventListener('change', () => {
+    diseaseCheckboxes.forEach(cb => {
+      if (cb !== noIssuesCheckbox) {
+        cb.checked = false;
+        cb.disabled = noIssuesCheckbox.checked;
+      }
+    });
+  });
+
+  document.getElementById('healthForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // تخزين بيانات الصفحة الثانية
+    localStorage.setItem("gender", document.getElementById('gender').value);
+    localStorage.setItem("age", document.getElementById('age').value);
+    localStorage.setItem("diseases", JSON.stringify(Array.from(document.querySelectorAll('input[name="disease"]:checked')).map(el => el.value)));
+    localStorage.setItem("food_allergy", document.getElementById('foodAllergy').value.trim());
+    localStorage.setItem("other_diseases", document.getElementById('otherDiseases').value.trim());
+
+    // الانتقال إلى الصفحة الثالثة
+    window.location.href = "body-info.html";
+  });
+</script>
 
 </body>
 </html>
