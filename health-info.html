@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>المعلومات الصحية</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      direction: rtl;
+      background-color: #f0f8ff;
+      padding: 20px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .checkbox-group label {
+      display: block;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>أدخل معلوماتك الصحية</h2>
+
+  <form id="healthForm">
+    <label>الجنس:</label>
+    <select id="gender" required>
+      <option value="">اختر الجنس</option>
+      <option value="ذكر">ذكر</option>
+      <option value="أنثى">أنثى</option>
+    </select>
+
+    <label>العمر:</label>
+    <input type="number" id="age" min="1" max="120" required>
+
+    <label>هل تعاني من أي من الأمراض التالية؟</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="disease" value="السكري النوع الأول"> السكري النوع الأول</label>
+      <label><input type="checkbox" name="disease" value="السكري النوع الثاني"> السكري النوع الثاني</label>
+      <label><input type="checkbox" name="disease" value="مقاومة الإنسولين"> مقاومة الإنسولين</label>
+      <label><input type="checkbox" name="disease" value="مبيض متعدد الكيسات"> مبيض متعدد الكيسات</label>
+      <label><input type="checkbox" name="disease" value="مريض قلب"> مريض قلب</label>
+      <label><input type="checkbox" name="disease" value="حساسية تجاه الأطعمة"> حساسية تجاه الأطعمة</label>
+      <label><input type="checkbox" name="disease" value="الشقيقة أو الصداع"> الشقيقة أو الصداع</label>
+      <label><input type="checkbox" id="noIssues" value="لا أعاني من مشاكل صحية"> لا أعاني من مشاكل صحية</label>
+    </div>
+
+    <label>الأطعمة التي تتحسس منها (إن وجدت):</label>
+    <textarea id="foodAllergy" rows="3" placeholder="مثال: المكسرات، الحليب، القمح..."></textarea>
+
+    <label>أمراض أخرى غير مذكورة:</label>
+    <textarea id="otherDiseases" rows="3" placeholder="اكتب هنا أي أمراض أخرى..."></textarea>
+
+    <button type="submit">إرسال</button>
+  </form>
+
+  <script>
+    const db = firebase.firestore();
+    const noIssuesCheckbox = document.getElementById('noIssues');
+    const diseaseCheckboxes = document.querySelectorAll('input[name="disease"]');
+
+    noIssuesCheckbox.addEventListener('change', () => {
+      diseaseCheckboxes.forEach(cb => {
+        if (cb !== noIssuesCheckbox) {
+          cb.checked = false;
+          cb.disabled = noIssuesCheckbox.checked;
+        }
+      });
+    });
+
+    document.getElementById('healthForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const userData = {
+        full_name: localStorage.getItem("fullName"),
+        birth_date: localStorage.getItem("birthDate"),
+        email: localStorage.getItem("email"),
+        country_code: localStorage.getItem("countryCode"),
+        phone: localStorage.getItem("phone"),
+        gender: document.getElementById('gender').value,
+        age: document.getElementById('age').value,
+        diseases: Array.from(document.querySelectorAll('input[name="disease"]:checked')).map(el => el.value),
+        food_allergy: document.getElementById('foodAllergy').value.trim(),
+        other_diseases: document.getElementById('otherDiseases').value.trim(),
+        created_at: new Date().toISOString()
+      };
+
+      db.collection("users").add(userData)
+        .then(() => {
+          window.location.href = "thank-you.html";
+        })
+        .catch((error) => {
+          console.error("خطأ في الحفظ:", error);
+          alert("حدث خطأ أثناء حفظ البيانات.");
+        });
+    });
+  </script>
+
+</body>
+</html>
